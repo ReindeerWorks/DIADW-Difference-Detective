@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Different Detective - Spot the Differences!</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 1600px;
+            width: 100%;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        h1 {
+            font-size: 3em;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+            margin-bottom: 10px;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .subtitle {
+            font-size: 1.2em;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+
+        .instructions {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .game-info {
+            display: flex;
+            justify-content: space-around;
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .info-item {
+            text-align: center;
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .info-label {
+            font-size: 0.9em;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .found {
+            color: #10b981;
+        }
+
+        .game-container {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .images-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 20px;
+        }
+
+        .image-container {
+            position: relative;
+            border: 4px solid #667eea;
+            border-radius: 10px;
+            overflow: hidden;
+            background: #f0f0f0;
+            cursor: crosshair;
+        }
+
+        .image-container img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .image-label {
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .marker {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            border: 4px solid #10b981;
+            border-radius: 50%;
+            background: rgba(16, 185, 129, 0.2);
+            transform: translate(-50%, -50%);
+            animation: markerPulse 1s ease-out;
+            pointer-events: none;
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.6);
+        }
+
+        @keyframes markerPulse {
+            0% {
+                transform: translate(-50%, -50%) scale(0);
+                opacity: 0;
+            }
+            50% {
+                transform: translate(-50%, -50%) scale(1.2);
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+            }
+        }
+
+        .wrong-marker {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            animation: wrongShake 0.5s ease-out;
+        }
+
+        .wrong-marker::before,
+        .wrong-marker::after {
+            content: '';
+            position: absolute;
+            width: 4px;
+            height: 60px;
+            background: #ef4444;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .wrong-marker::before {
+            transform: translate(-50%, -50%) rotate(45deg);
+        }
+
+        .wrong-marker::after {
+            transform: translate(-50%, -50%) rotate(-45deg);
+        }
+
+        @keyframes wrongShake {
+            0%, 100% { transform: translate(-50%, -50%) rotate(0deg); }
+            25% { transform: translate(-50%, -50%) rotate(-10deg); }
+            75% { transform: translate(-50%, -50%) rotate(10deg); }
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 15px 30px;
+            font-size: 1.1em;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .btn-secondary:hover {
+            background: #d1d5db;
+            transform: translateY(-2px);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 500px;
+            animation: modalSlideIn 0.5s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-content h2 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+
+        .modal-content p {
+            font-size: 1.2em;
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .celebration {
+            font-size: 3em;
+            margin-bottom: 20px;
+        }
+
+        .stats {
+            background: #f9fafb;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .stat-row:last-child {
+            border-bottom: none;
+        }
+
+        .stat-label {
+            font-weight: bold;
+            color: #374151;
+        }
+
+        .stat-value {
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        @media (max-width: 1024px) {
+            .images-wrapper {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            .game-container {
+                padding: 15px;
+            }
+        }
+
+        @media (max-width: 640px) {
+            body {
+                padding: 10px;
+            }
+
+            h1 {
+                font-size: 1.5em;
+            }
+
+            .subtitle {
+                font-size: 1em;
+            }
+
+            .game-info {
+                padding: 15px;
+            }
+
+            .info-value {
+                font-size: 1.5em;
+            }
+
+            button {
+                padding: 12px 20px;
+                font-size: 0.9em;
+            }
+        }
+
+        .hint-button {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+        }
+
+        .hint-button:hover {
+            box-shadow: 0 6px 20px rgba(245, 158, 11, 0.6);
+        }
+
+        .hint-button:disabled {
+            background: #d1d5db;
+            cursor: not-allowed;
+            transform: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔍 Different Detective 🔍</h1>
+            <div class="subtitle">Can you spot all 3 differences?</div>
+            <div class="instructions">
+                Click on the differences you find in either image!
+            </div>
+        </header>
+
+        <div class="game-info">
+            <div class="info-item">
+                <div class="info-label">Found</div>
+                <div class="info-value found" id="found-count">0</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Total</div>
+                <div class="info-value" id="total-count">3</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Timer</div>
+                <div class="info-value" id="timer">00:00</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">Clicks</div>
+                <div class="info-value" id="click-count">0</div>
+            </div>
+        </div>
+
+        <div class="game-container">
+            <div class="images-wrapper">
+                <div>
+                    <div class="image-label">Original Scene</div>
+                    <div class="image-container" id="image1-container">
+                        <img src="image1.png" alt="Original" id="image1">
+                    </div>
+                </div>
+                <div>
+                    <div class="image-label">Find the Differences</div>
+                    <div class="image-container" id="image2-container">
+                        <img src="image2.png" alt="Different" id="image2">
+                    </div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button class="btn-primary" id="restart-btn">🔄 Restart Game</button>
+                <button class="hint-button" id="hint-btn">💡 Hint (3 left)</button>
+                <button class="btn-secondary" id="give-up-btn">Show All</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="victory-modal">
+        <div class="modal-content">
+            <div class="celebration">🎉🎊🎉</div>
+            <h2>Congratulations!</h2>
+            <p>You found all the differences!</p>
+            <div class="stats">
+                <div class="stat-row">
+                    <span class="stat-label">Time:</span>
+                    <span class="stat-value" id="final-time">00:00</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Total Clicks:</span>
+                    <span class="stat-value" id="final-clicks">0</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Accuracy:</span>
+                    <span class="stat-value" id="accuracy">100%</span>
+                </div>
+            </div>
+            <button class="btn-primary" id="play-again-btn">Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        // Game state
+        const gameState = {
+            found: new Set(),
+            clicks: 0,
+            startTime: null,
+            timerInterval: null,
+            hintsLeft: 3,
+            gameActive: true
+        };
+
+        // Define difference coordinates (as percentages of image dimensions)
+        const differences = [
+            // Purple creature (flipped) - upper left area
+            { x: 23, y: 35, radius: 8, name: "Purple Creature" },
+            // Basketball to Kite - middle area
+            { x: 42, y: 35, radius: 8, name: "Ball to Kite" },
+            // Blue creature's eye - right area  
+            { x: 72, y: 50, radius: 6, name: "Blue Creature's Eye" }
+        ];
+
+        // DOM elements
+        const image1Container = document.getElementById('image1-container');
+        const image2Container = document.getElementById('image2-container');
+        const foundCount = document.getElementById('found-count');
+        const totalCount = document.getElementById('total-count');
+        const timerElement = document.getElementById('timer');
+        const clickCount = document.getElementById('click-count');
+        const restartBtn = document.getElementById('restart-btn');
+        const hintBtn = document.getElementById('hint-btn');
+        const giveUpBtn = document.getElementById('give-up-btn');
+        const victoryModal = document.getElementById('victory-modal');
+        const playAgainBtn = document.getElementById('play-again-btn');
+
+        // Initialize game
+        function initGame() {
+            gameState.found.clear();
+            gameState.clicks = 0;
+            gameState.startTime = Date.now();
+            gameState.hintsLeft = 3;
+            gameState.gameActive = true;
+            
+            updateUI();
+            startTimer();
+            clearMarkers();
+            
+            hintBtn.disabled = false;
+            hintBtn.textContent = `💡 Hint (${gameState.hintsLeft} left)`;
+        }
+
+        // Start timer
+        function startTimer() {
+            if (gameState.timerInterval) {
+                clearInterval(gameState.timerInterval);
+            }
+            
+            gameState.timerInterval = setInterval(() => {
+                const elapsed = Math.floor((Date.now() - gameState.startTime) / 1000);
+                const minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
+                const seconds = (elapsed % 60).toString().padStart(2, '0');
+                timerElement.textContent = `${minutes}:${seconds}`;
+            }, 1000);
+        }
+
+        // Update UI
+        function updateUI() {
+            foundCount.textContent = gameState.found.size;
+            totalCount.textContent = differences.length;
+            clickCount.textContent = gameState.clicks;
+        }
+
+        // Clear all markers
+        function clearMarkers() {
+            document.querySelectorAll('.marker, .wrong-marker').forEach(marker => marker.remove());
+        }
+
+        // Check if click is near a difference
+        function checkClick(x, y, imgWidth, imgHeight) {
+            const xPercent = (x / imgWidth) * 100;
+            const yPercent = (y / imgHeight) * 100;
+
+            for (let i = 0; i < differences.length; i++) {
+                if (gameState.found.has(i)) continue;
+
+                const diff = differences[i];
+                const distance = Math.sqrt(
+                    Math.pow(xPercent - diff.x, 2) + Math.pow(yPercent - diff.y, 2)
+                );
+
+                if (distance <= diff.radius) {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+        // Add marker to image
+        function addMarker(container, x, y, isCorrect = true) {
+            const marker = document.createElement('div');
+            marker.className = isCorrect ? 'marker' : 'wrong-marker';
+            marker.style.left = x + 'px';
+            marker.style.top = y + 'px';
+            container.appendChild(marker);
+
+            if (!isCorrect) {
+                setTimeout(() => marker.remove(), 500);
+            }
+        }
+
+        // Handle image click
+        function handleImageClick(e, container) {
+            if (!gameState.gameActive) return;
+
+            gameState.clicks++;
+            updateUI();
+
+            const rect = e.target.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            const foundIndex = checkClick(x, y, e.target.width, e.target.height);
+
+            if (foundIndex !== -1) {
+                gameState.found.add(foundIndex);
+                
+                // Add markers to both images
+                const xPercent = differences[foundIndex].x;
+                const yPercent = differences[foundIndex].y;
+                
+                const img1 = document.getElementById('image1');
+                const img2 = document.getElementById('image2');
+                
+                const x1 = (xPercent / 100) * img1.width;
+                const y1 = (yPercent / 100) * img1.height;
+                const x2 = (xPercent / 100) * img2.width;
+                const y2 = (yPercent / 100) * img2.height;
+                
+                addMarker(image1Container, x1, y1, true);
+                addMarker(image2Container, x2, y2, true);
+                
+                updateUI();
+
+                // Check for victory
+                if (gameState.found.size === differences.length) {
+                    setTimeout(showVictory, 500);
+                }
+            } else {
+                addMarker(container, x, y, false);
+            }
+        }
+
+        // Show victory modal
+        function showVictory() {
+            gameState.gameActive = false;
+            clearInterval(gameState.timerInterval);
+            
+            const elapsed = Math.floor((Date.now() - gameState.startTime) / 1000);
+            const minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
+            const seconds = (elapsed % 60).toString().padStart(2, '0');
+            
+            document.getElementById('final-time').textContent = `${minutes}:${seconds}`;
+            document.getElementById('final-clicks').textContent = gameState.clicks;
+            
+            const accuracy = Math.round((differences.length / gameState.clicks) * 100);
+            document.getElementById('accuracy').textContent = accuracy + '%';
+            
+            victoryModal.classList.add('active');
+        }
+
+        // Show hint
+        function showHint() {
+            if (gameState.hintsLeft === 0 || !gameState.gameActive) return;
+            
+            gameState.hintsLeft--;
+            hintBtn.textContent = `💡 Hint (${gameState.hintsLeft} left)`;
+            
+            if (gameState.hintsLeft === 0) {
+                hintBtn.disabled = true;
+            }
+
+            // Find first unfound difference
+            for (let i = 0; i < differences.length; i++) {
+                if (!gameState.found.has(i)) {
+                    const diff = differences[i];
+                    const img1 = document.getElementById('image1');
+                    const img2 = document.getElementById('image2');
+                    
+                    const x1 = (diff.x / 100) * img1.width;
+                    const y1 = (diff.y / 100) * img1.height;
+                    const x2 = (diff.x / 100) * img2.width;
+                    const y2 = (diff.y / 100) * img2.height;
+                    
+                    // Add pulsing hint circles
+                    const hint1 = document.createElement('div');
+                    const hint2 = document.createElement('div');
+                    hint1.className = 'marker';
+                    hint2.className = 'marker';
+                    hint1.style.left = x1 + 'px';
+                    hint1.style.top = y1 + 'px';
+                    hint2.style.left = x2 + 'px';
+                    hint2.style.top = y2 + 'px';
+                    hint1.style.borderColor = '#f59e0b';
+                    hint2.style.borderColor = '#f59e0b';
+                    hint1.style.background = 'rgba(245, 158, 11, 0.2)';
+                    hint2.style.background = 'rgba(245, 158, 11, 0.2)';
+                    
+                    image1Container.appendChild(hint1);
+                    image2Container.appendChild(hint2);
+                    
+                    // Remove hints after 2 seconds
+                    setTimeout(() => {
+                        hint1.remove();
+                        hint2.remove();
+                    }, 2000);
+                    
+                    break;
+                }
+            }
+        }
+
+        // Give up - show all differences
+        function giveUp() {
+            if (!confirm('Are you sure you want to reveal all differences?')) return;
+            
+            gameState.gameActive = false;
+            clearInterval(gameState.timerInterval);
+            
+            differences.forEach((diff, index) => {
+                if (!gameState.found.has(index)) {
+                    const img1 = document.getElementById('image1');
+                    const img2 = document.getElementById('image2');
+                    
+                    const x1 = (diff.x / 100) * img1.width;
+                    const y1 = (diff.y / 100) * img1.height;
+                    const x2 = (diff.x / 100) * img2.width;
+                    const y2 = (diff.y / 100) * img2.height;
+                    
+                    addMarker(image1Container, x1, y1, true);
+                    addMarker(image2Container, x2, y2, true);
+                }
+            });
+            
+            gameState.found = new Set([0, 1, 2]);
+            updateUI();
+        }
+
+        // Event listeners
+        image1Container.addEventListener('click', (e) => {
+            if (e.target.tagName === 'IMG') {
+                handleImageClick(e, image1Container);
+            }
+        });
+
+        image2Container.addEventListener('click', (e) => {
+            if (e.target.tagName === 'IMG') {
+                handleImageClick(e, image2Container);
+            }
+        });
+
+        restartBtn.addEventListener('click', initGame);
+        hintBtn.addEventListener('click', showHint);
+        giveUpBtn.addEventListener('click', giveUp);
+        playAgainBtn.addEventListener('click', () => {
+            victoryModal.classList.remove('active');
+            initGame();
+        });
+
+        // Close modal on background click
+        victoryModal.addEventListener('click', (e) => {
+            if (e.target === victoryModal) {
+                victoryModal.classList.remove('active');
+            }
+        });
+
+        // Initialize on load
+        window.addEventListener('load', initGame);
+    </script>
+</body>
+</html>
